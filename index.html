@@ -1,0 +1,1395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="description" content="Vlad Slyusar's Digital Resume + 3D City Demo">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vlad Slyusar | Digital Resume 3D</title>
+  <!-- THREE.JS -->
+  <script src="https://cdn.jsdelivr.net/npm/three@0.152.0/build/three.min.js"></script>
+  <style>
+    /* Basic global styles */
+  /* Basic global styles */
+body {
+  margin: 0;
+  background: #000;
+  color: #fff;
+  font-family: sans-serif;
+  overflow-x: hidden;
+  text-align: center;
+}
+canvas {
+  display: block;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+}
+
+/* Container to help center and manage max width for content */
+.container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  box-sizing: border-box;
+  padding: 1rem;
+}
+
+/* Header */
+header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 999;
+  padding: 1rem;
+  background: rgba(0,0,0,0.9); /* Darker background */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+header h1 {
+  position: absolute;
+  left: 1rem;
+  margin: 0;
+  font-size: 1.4rem;
+  font-weight: 600;
+}
+
+/* New narrow view buttons */
+.narrow-btn {
+  display: none; /* Hidden by default */
+  font-size: 1rem;
+  font-weight: bold;
+  color: #fff;
+  text-decoration: none;
+  margin-left: 1rem;
+  background: rgba(0, 0, 0, 0.7);
+  padding: 0.5rem 1rem;
+  border-radius: 5px;
+}
+
+.narrow-btn:hover {
+  color: hotpink;
+}
+
+.hamburger {
+  position: absolute;
+  right: 1rem;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #fff;
+  display: none; /* Hidden by default */
+}
+
+nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+nav a {
+  margin: 0 1rem;
+  font-size: 1rem;
+  font-weight: bold;
+  color: #fff;
+  text-decoration: none;
+}
+
+nav a:hover {
+  color: hotpink;
+}
+
+/* Uniform spacing for main sections */
+section {
+  padding: 6rem 2rem 2rem 2rem; /* Add more bottom padding */
+  margin-bottom: 20rem; /* Add extra margin between sections */
+  box-sizing: border-box;
+}
+h2 {
+  margin-top: 0;
+  letter-spacing: 1px;
+}
+
+/* Reusable background block */
+.block-bg {
+  background: rgba(0,0,0,0.5);
+  padding: 1rem 2rem;
+  border-radius: 10px;
+  margin: 1rem auto;
+  max-width: 800px; /* narrower to keep text lines readable */
+}
+
+/* Two-column section layout (for specific sections that remain unchanged) */
+.columns {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 2rem;
+  margin-top: 1rem;
+}
+.column {
+  flex: 1 1 300px;
+  max-width: 600px;
+  box-sizing: border-box;
+}
+
+/* Image placeholders with rounded corners */
+.rounded-image {
+  width: 100%;
+  max-width: 300px;
+  height: auto;
+  border-radius: 10px;
+  display: block;
+  margin: 0 auto 1rem auto; /* extra bottom margin for spacing */
+}
+
+/* Lists and typography */
+ul {
+  text-align: left;
+  margin: 0 auto 1rem auto;
+  padding-left: 1.2rem;
+}
+p {
+  margin: 0 auto 1rem auto;
+  line-height: 1.5;
+  color: rgba(255,255,255,0.85);
+}
+
+/* Footer */
+footer {
+  text-align: center;
+  padding: 2rem 1rem;
+  background: rgba(0,0,0,0.3);
+}
+
+/* Fade overlay for scrolling intro effect */
+#scroll-fade {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #000;
+  pointer-events: none;
+  z-index: 998;
+  opacity: 1;
+  transition: opacity 1s ease-out;
+}
+
+/* Responsive navigation */
+@media (max-width:768px) {
+  nav {
+    display: none;
+    flex-direction: column;
+    background: rgba(0,0,0,0.9);
+    position: absolute;
+    top: 60px;
+    right: 1rem;
+    border-radius: 5px;
+    padding: 1rem;
+  }
+  nav a {
+    margin: 0.5rem 0;
+  }
+  .hamburger {
+    display: block; /* Show hamburger menu */
+  }
+  .narrow-btn {
+    display: inline-block; /* Show only in mobile view */
+  }
+}
+
+nav.active {
+  display: flex;
+}
+
+/* Contact Form */
+#contact-form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+#contact-form input[type="email"] {
+  padding: 0.5rem;
+  margin-bottom: 1rem;
+  border: none;
+  border-radius: 5px;
+  width: 100%;
+  max-width: 300px;
+}
+
+#contact-form button {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 5px;
+  background: hotpink;
+  color: #fff;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+#contact-form button:hover {
+  background: #ff69b4;
+}
+
+  </style>
+</head>
+<body>
+  <div id="scroll-fade"></div>
+  <canvas id="webgl-bg"></canvas>
+<header>
+  <h1>Vlad Slyusar</h1>
+  <!-- New buttons for narrow view -->
+  <a href="#resume3d" id="narrow-home" class="narrow-btn">Home</a>
+  <a href="#contact" id="narrow-contact" class="narrow-btn">Contact</a>
+  <div class="hamburger" id="hamburger" aria-label="Toggle navigation" aria-expanded="false">&#9776;</div>
+  <nav id="nav-links">
+    <a href="#resume3d">Home</a>
+    <a href="#intro">Intro</a>
+    <a href="#school">School</a>
+    <a href="#work">Work</a>
+    <a href="#projects">Projects</a>
+    <a href="#publications">Publications</a>
+    <a href="#leadership">Leadership</a>
+    <a href="#contact">Contact</a>
+  </nav>
+</header>
+
+
+  <!-- 3D Resume (One column) -->
+  <section id="resume3d">
+    <div class="container">
+      <h2>3D Resume</h2>
+      <div hidden class="block-bg">
+        <p>Welcome to my interactive 3D resume. Scroll down to explore more!</p>
+      </div>
+    </div>
+  </section>
+<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+  <!-- Intro (One column) -->
+  <section id="intro">
+    <div class="container">
+      <h2>Introduction</h2>
+      <div class="block-bg">
+        
+        <p>
+          Highly accomplished Computer/Electrical Engineer with over 10 years experience delivering advanced connectivity, 
+          high-precision positioning, RF systems, embedded software, and hardware design solutions. Demonstrated track record 
+          in autonomous vehicle (AV) technology, cybersecurity, network security, and IoT integration, backed by a 4.0 M.S.E. 
+          GPA and dual B.S.E. degrees.
+        </p>
+      </div>
+<img src="https://lh3.googleusercontent.com/sZ2UgZE7oDgWT0N3AoFDvHIGbC6YK1ySseHBklVmVwNq0qsRFiJ7UMf0B_31fhQyRy1Fi8r2dTXyODXlVE0afWCJ1h75fPP-Y9yzN8fn1qcWiXY2Ty1tj-Ol5hVmS_69zg=w1280" alt="Vlad Slyusar" class="rounded-image">
+      <div class="block-bg">
+        <p>
+          Possesses in-depth expertise in 5G/mmWave, RTK/NRTK GNSS, MEC, Edge AI, SDR, and DevSecOps. Adept at leading 
+          complex R&amp;D projects, optimizing embedded systems, and managing multiple large-scale deployments in fast-paced, 
+          deadline-driven environments. Excellent communication, analytical, and leadership abilities, reinforced by hands-on 
+          experience in machine learning, blockchain, and cloud technologies. Passionate about driving innovation, scalable 
+          solutions, and secure vehicular communications that power the next generation of mobility.
+        </p>
+      </div>
+  
+  </section>
+
+  <!-- Technical Skills (Remains as is: 2 columns) -->
+  <section>
+    <div class="container">
+      <h2>Technical Skills</h2>
+      <div class="columns">
+        <div class="column">
+          <div class="block-bg">
+            <h3>Programming Languages</h3>
+            <p>Python, C++, JavaScript, C, Rust, Go, TypeScript, SQL, Assembly, VHDL, MATLAB, PHP, Swift</p>
+          </div>
+          <div class="block-bg">
+            <h3>Software &amp; Tools</h3>
+            <p>Docker, Kubernetes, AWS, Git, TensorFlow, PyTorch, Qt, QNX, Altium Designer, Cadence Allegro, MATLAB, GNU Radio, 
+              SDR (Software-Defined Radio), Wireshark, OpenGL, Eagle CAD, Jenkins, SolidWorks, Simulink</p>
+          </div>
+          <div class="block-bg">
+            <h3>Hardware</h3>
+            <p>FPGA (Spartan 3E), ARM Cortex-M3, SoC Integration, IoT Devices, Raspberry Pi, Arduino, PCB Design (2-8 layers, 
+              blind/buried vias), Power Management, Signal Integrity Analysis, Thermal Management, SDR Devices, MPC57xx Calypso/Bolero</p>
+          </div>
+        </div>
+        <div class="column">
+          <div class="block-bg">
+            <h3>Networking</h3>
+            <p>5G/mmWave, SDN (Software-Defined Networking), Network Virtualization, Network Security Protocols (TLS, SSL), IPv6, 
+              Cellular/Wi-Fi/Bluetooth/RF Connectivity, VPN, Advanced Routing Techniques, MEC (Mobile Edge Computing), NTRIP/RTCM, 
+              Network Automation</p>
+          </div>
+          <div class="block-bg">
+            <h3>Embedded Systems</h3>
+            <p>Real-Time Operating Systems (RTOS), Embedded Linux, IoT Protocols (MQTT, CoAP), Cross-Platform Development, 
+              Low-Level Coding, SoC Testing, Firmware Development, Board Support Level (BSL) Integration, CAN Bus, Device Drivers</p>
+          </div>
+          <div class="block-bg">
+            <h3>Other Skills</h3>
+            <p>Machine Learning, Artificial Intelligence, DevSecOps, High-Level Software Development, ASIC Design, VLSI CAD, GNSS Solutions 
+              (PPP-RTK, DGNSS), Signal Processing, EMC Testing, Cyber-Physical Systems, Blockchain, Agile/Scrum Methodologies</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- School (One column) -->
+  <section id="school">
+    <div class="container">
+      <h2>School</h2>
+      <div class="block-bg">
+        <h3>Master of Science in Computer Engineering</h3>
+        <p>
+          Rackham Graduate School, University of Michigan<br>
+          September 2016 – December 2017 | GPA: 4.0
+        </p>
+      </div>
+      <div class="block-bg">
+        <h3>Bachelor of Science in Electrical Engineering</h3>
+		<h3>Bachelor of Science in Computer Engineering</h3>
+		<h3>Minor in Computer Science</h3>
+        <p>
+          University of Michigan – Dearborn, MI<br>
+          September 2012 – April 2016 | GPA: 3.94
+        </p>
+      </div>
+	  <br><br><br><br>
+	  <div class="block-bg">
+        <h3>Relevant Coursework</h3>
+        <ul>
+          Advanced Embedded Systems, Digital Signal Processing, Wireless Communication, 
+          Analog &amp; Digital Communication Systems, Assembly Programming, Automatic Control Systems, Computer Hardware 
+          Organization &amp; Design, Embedded System Design, Electromagnetic Compatibility, Microelectronics, Circuit Design, 
+          Control Systems, Data Structures &amp; Algorithms, Database Management Systems, Electrical Materials &amp; Devices, 
+          Introduction to VLSI, Operating Systems, Power Electronics, System Design &amp; Microcontrollers
+        </ul>
+      </div>
+	  <br><br><br><br>
+      <div class="block-bg">
+        <h3>Awards</h3>
+        <ul>
+          <li><strong>James B. Angell Scholar:</strong> Earned exclusively A grades over 8 terms (covering two Eng. Degrees + CIS minor).</li>
+          <li><strong>Chancellor’s Scholarship Recipient:</strong> Awarded full tuition for exceptional academic performance (HS GPA &gt; 4.0).</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- Work (Ford Motor Company remains unchanged, other items stay multi-col) -->
+  <section id="work">
+    <div class="container">
+      <h2>Work Experience</h2>
+      <!-- Ford Motor Company (unchanged layout) -->
+      <div class="block-bg">
+        <h3>Ford Motor Company</h3>
+        <p><strong>Senior Computer/Electrical Engineer</strong><br>Dearborn, MI &amp; Palo Alto, CA | May 2014 – June 2023</p>
+      </div>
+      <div class="columns">
+        <div class="column">
+          <div class="block-bg">
+            <h4>Advanced Connectivity Research</h4>
+            <ul>
+              <li>PoCs for Cellular, Wi-Fi, Bluetooth, RF, IoT (US-12192868-B2; US-20230370822-A1)</li>
+              <li>5G/mmWave testing at 28GHz (US-11210943-B2)</li>
+              <li>Private 5G mmWave network w/ MEC &amp; Edge AI (US-20240412630-A1, US-20210272454-A1)</li>
+              <li>Resolved 5G/4G/5G handover issues w/ major telecom</li>
+            </ul>
+          </div>
+          <div class="block-bg">
+            <h4>Deployment &amp; Modification</h4>
+            <ul>
+              <li>Deployed 100+ TCUs &amp; ECGs for first AV fleet (US-20190007900-A1)</li>
+              <li>Supported 100 AVs across 5 major cities (US-12181869-B2; US-20230195105-A1)</li>
+            </ul>
+          </div>
+          <div class="block-bg">
+            <h4>RF Diagnostics</h4>
+            <ul>
+              <li>Used SDR &amp; Wi-Fi Pineapple for trailer camera troubleshooting (US-11812355-B2)</li>
+              <li>Monitored video streams for anomalies (US-11991346-B2; US-20230156179-A1)</li>
+            </ul>
+          </div>
+        </div>
+        <div class="column">
+          <div class="block-bg">
+            <h4>High Precision Positioning Research</h4>
+            <ul>
+              <li>Multi-constellation GNSS for AV accuracy (US-20240329184-A1)</li>
+              <li>SSR/OSR corrections over NTRIP/RTCM; advanced RTK with OSU</li>
+              <li>GNSS jamming/spoofing detection, sensor fusion, SLAM integration</li>
+              <li>Adaptive guidance for matching driver styles (US-20220176986-A1)</li>
+            </ul>
+          </div>
+          <div class="block-bg">
+            <h4>Embedded Software &amp; Hardware</h4>
+            <ul>
+              <li>Qt apps on QNX/Linux, GUIs in Qt/C++</li>
+              <li>Firmware for MPC57xx Calypso/Bolero, SoC &amp; BSL integration</li>
+              <li>Designed VMCU, Ethernet boards, advanced PCB, EMC tests, BGA rework</li>
+              <li>OpenGL GPU/CPU benchmarks, TCU software w/ AT cmds (US-20180213414-A1)</li>
+            </ul>
+          </div>
+          <div class="block-bg">
+            <h4>Ideation &amp; Innovation</h4>
+            <p>
+              Conceived and patented a range of vehicle communication/assistance solutions: 
+              (US-10542493-B2, US-12037021-B2, US-20220377519-A1, US-20220321352-A1, US-11395107-B1, US-11812355-B2, 
+              US-11551456-B2, US-11750393-B2, US-20180213414-A1, US-11880867-B2, US-20230237529-A1, US-10305527-B2).
+            </p>
+          </div>
+        </div>
+      </div>
+      <!-- Valeo / Vector CANtech / Freelance remain multi-col as well -->
+	  <br><br><br><br>
+	  <div class="block-bg">
+        <h3>Valeo Inc.</h3>
+            <p><strong>Network Management Intern</strong><br>Troy, MI | April 2013 – September 2013</p>
+      </div>
+	  <div class="block-bg">
+              <li>Managed server backups; resolved Windows/Linux issues</li>
+              <li>2nd/3rd level support, AD/WSUS, security hardening</li>
+              <li>Performed OS/software upgrades, trained new hires</li>
+      </div>
+	  <br><br><br><br>
+	  <div class="block-bg">
+         <h3>Vector CANtech</h3>
+            <p><strong>Computer Engineering Intern</strong><br>Novi, MI | March 2012 – June 2012</p>
+      </div>
+	  <div class="block-bg">
+              <li>Analyzed embedded devices per OEM specs</li>
+              <li>Defined hardware requirements for Tier 1 suppliers</li>
+              <li>Organized/tested embedded hardware, improved inventory mgmt</li>
+      </div>
+	  <br><br><br><br>
+	  <div class="block-bg">
+         <h3>Freelance</h3>
+              <p><strong>Software/Web Developer</strong><br>Northville, MI | Nov 2010 – Mar 2013</p>
+      </div>
+	  <div class="block-bg">
+                <li>Developed full-stack solutions (HTML/CSS/JS, PHP, SQL/NoSQL)</li>
+                <li>Used Angular, Node.js, Google Cloud, mobile (Android/iOS)</li>
+                <li>Applied Agile/Scrum for client deliverables</li>
+      </div>
+	  
+
+      </div>
+    </div>
+  </section>
+
+  <!-- Projects (Remains as is: 2 columns) -->
+  <section id="projects">
+    <div class="container">
+      <h2>Projects</h2>
+      <div class="columns">
+        <div class="column">
+          <div class="block-bg">
+            <h3>Human Heart Rate Extraction from Video</h3>
+            <p>
+              <strong>Description:</strong> MATLAB system using Viola-Jones, KLT, Eulerian Magnification. <br>
+              <strong>Technologies:</strong> MATLAB, Computer Vision, Deep Learning. <br>
+              <strong>Achievements:</strong> Accurate BPM under low-light/noisy conditions.
+            </p>
+          </div>
+          <div class="block-bg">
+            <h3>Vehicle Keyfob Security Bypass</h3>
+            <p>
+              <strong>Description:</strong> Rolling code vulnerability demonstration via HackRF &amp; GNU Radio. <br>
+              <strong>Technologies:</strong> HackRF SDR, RTL-SDR, GRC, DVB-T. <br>
+              <strong>Achievements:</strong> Unlocked vehicles, highlighting cybersecurity flaws.
+            </p>
+          </div>
+          <div class="block-bg">
+            <h3>One-Time-Pad Secure Communication</h3>
+            <p>
+              <strong>Description:</strong> Vernam Cipher with ARM M3 Teensy &amp; Spartan 3E FPGA. <br>
+              <strong>Technologies:</strong> VHDL, Cryptography, Secure Protocols. <br>
+              <strong>Achievements:</strong> Custom messaging, mathematically unbreakable encryption.
+            </p>
+          </div>
+		  <div class="block-bg">
+            <h3>Custom 8-Bit ALU ASIC Design</h3>
+            <p>
+              <strong>Description:</strong> 8-bit ALU w/ VLSI CAD &amp; 50-micron photolithography. <br>
+              <strong>Technologies:</strong> VLSI CAD, Photolithography, Spartan 3E FPGA. <br>
+              <strong>Achievements:</strong> Verified 8 ALU functions with two 8-bit operands.
+            </p>
+          </div>
+        </div>
+        <div class="column">
+          
+          <div class="block-bg">
+            <h3>Hidden Markov Models for Speech Recognition</h3>
+            <p>
+              <strong>Description:</strong> HMM-based speech recognition in MATLAB with Baum-Welch. <br>
+              <strong>Technologies:</strong> MATLAB, NLP, Feature Engineering. <br>
+              <strong>Achievements:</strong> High accuracy classification in low-resource environments.
+            </p>
+          </div>
+          <div class="block-bg">
+            <h3>Laser Harp DMX Light Controller</h3>
+            <p>
+              <strong>Description:</strong> Digital synth/MIDI controller with laser diodes &amp; DMX512. <br>
+              <strong>Technologies:</strong> Laser Diodes, DMX512, MIDI Protocol. <br>
+              <strong>Achievements:</strong> Real-time audio-visual integration for DJ effects.
+            </p>
+          </div>
+          <div class="block-bg">
+            <h3>VHDL-Based Graphics Card &amp; Elevator Controller</h3>
+            <p>
+              <strong>Description:</strong> 8-bit graphics &amp; elevator simulation on Spartan 3E FPGA. <br>
+              <strong>Technologies:</strong> VHDL, VGA Output, Real-Time Logic. <br>
+              <strong>Achievements:</strong> Real-time animation &amp; control, FPGA-based design.
+            </p>
+          </div>
+          <div class="block-bg">
+            <h3>Custom Xv6 Unix Kernel Scheduler</h3>
+            <p>
+              <strong>Description:</strong> Enhanced Xv6 kernel with MLFQ scheduling. <br>
+              <strong>Technologies:</strong> C, Xv6 Kernel, QEMU. <br>
+              <strong>Achievements:</strong> Improved concurrency &amp; resource management.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Publications & Patents -->
+ <section id="publications">
+  <div class="container">
+    <h2>Publications &amp; Patents</h2>
+
+    <!-- United States Patents -->
+    <h3>United States Patents</h3>
+
+    <!-- Patent Entry 1 -->
+<div class="patent-entry block-bg">
+  <h4><a href="https://patents.google.com/patent/US12192868B2" target="_blank" style="color: white; text-decoration: none;">
+        <strong>[US-12192868-B2]</strong>
+      </a> - Adaptively Selecting Network APN for Vehicle Application Remote Computing Demand</h4>
+  <div class="patent-image">
+    <a href="https://patents.google.com/patent/US12192868B2" target="_blank">
+      <object data="test1.pdf" type="application/pdf" width="600" height="400">
+        <a href="test1.pdf">Download PDF</a>
+      </object>
+    </a>
+  </div>
+  <div class="patent-content">
+    <p><strong>Date Issued:</strong> January 7, 2025</p>
+    <p><strong>Abstract:</strong> Managing...</p>
+  </div>
+</div>
+
+
+<br>
+
+<!-- Patent Entry 2 -->
+<div class="patent-entry block-bg">
+  <h4><a href="https://patents.google.com/patent/US12181869B2" target="_blank" style="color: white; text-decoration: none;">
+        <strong>[US-12181869-B2]</strong>
+      </a> - Remote Driving a Plurality of Vehicles in a Platoon</h4>
+  <div class="patent-image">
+    <a href="https://patents.google.com/patent/US12181869B2" target="_blank">
+      <img src="https://lh3.googleusercontent.com/sZ2UgZE7oDgWT0N3AoFDvHIGbC6YK1ySseHBklVmVwNq0qsRFiJ7UMf0B_31fhQyRy1Fi8r2dTXyODXlVE0afWCJ1h75fPP-Y9yzN8fn1qcWiXY2Ty1tj-Ol5hVmS_69zg=w1280" alt="US12181869B2 Patent">
+    </a>
+  </div>
+  <div class="patent-content">
+    <p><strong>Date Issued:</strong> December 31, 2024</p>
+    <p><strong>Abstract:</strong> Broadcasts remote commands.</p>
+  </div>
+</div>
+<br>
+
+<!-- Patent Entry 3 -->
+<div class="patent-entry block-bg">
+  <h4><a href="https://patents.google.com/patent/US20240412630A1" target="_blank" style="color: white; text-decoration: none;">
+        <strong>[US-20240412630-A1]</strong>
+      </a> - Edge Computing Assisted Vehicle Alerting</h4>
+  <div class="patent-image">
+    <a href="https://patents.google.com/patent/US20240412630A1" target="_blank">
+      <img src="https://lh3.googleusercontent.com/sZ2UgZE7oDgWT0N3AoFDvHIGbC6YK1ySseHBklVmVwNq0qsRFiJ7UMf0B_31fhQyRy1Fi8r2dTXyODXlVE0afWCJ1h75fPP-Y9yzN8fn1qcWiXY2Ty1tj-Ol5hVmS_69zg=w1280" alt="US20240412630A1 Patent">
+    </a>
+  </div>
+  <div class="patent-content">
+    <p><strong>Date Issued:</strong> December 12, 2024</p>
+    <p><strong>Abstract:</strong> Manages traffic queues with edge servers.</p>
+  </div>
+</div>
+<br>
+
+<!-- Patent Entry 4 -->
+<div class="patent-entry block-bg">
+  <h4><a href="https://patents.google.com/patent/US20240329184A1" target="_blank" style="color: white; text-decoration: none;">
+        <strong>[US-20240329184-A1]</strong>
+      </a> - High-Accuracy Device Positioning</h4>
+  <div class="patent-image">
+    <a href="https://patents.google.com/patent/US20240329184A1" target="_blank">
+      <img src="https://lh3.googleusercontent.com/sZ2UgZE7oDgWT0N3AoFDvHIGbC6YK1ySseHBklVmVwNq0qsRFiJ7UMf0B_31fhQyRy1Fi8r2dTXyODXlVE0afWCJ1h75fPP-Y9yzN8fn1qcWiXY2Ty1tj-Ol5hVmS_69zg=w1280" alt="US20240329184A1 Patent">
+    </a>
+  </div>
+  <div class="patent-content">
+    <p><strong>Date Issued:</strong> October 3, 2024</p>
+    <p><strong>Abstract:</strong> Uses absolute positioning & fingerprinting.</p>
+  </div>
+</div>
+<br>
+
+<!-- Patent Entry 5 -->
+<div class="patent-entry block-bg">
+  <h4><a href="https://patents.google.com/patent/US12037021B2" target="_blank" style="color: white; text-decoration: none;">
+        <strong>[US-12037021-B2]</strong>
+      </a> - Electric Autonomous Vehicle Ride</h4>
+  <div class="patent-image">
+    <a href="https://patents.google.com/patent/US12037021B2" target="_blank">
+      <img src="https://lh3.googleusercontent.com/sZ2UgZE7oDgWT0N3AoFDvHIGbC6YK1ySseHBklVmVwNq0qsRFiJ7UMf0B_31fhQyRy1Fi8r2dTXyODXlVE0afWCJ1h75fPP-Y9yzN8fn1qcWiXY2Ty1tj-Ol5hVmS_69zg=w1280" alt="US12037021B2 Patent">
+    </a>
+  </div>
+  <div class="patent-content">
+    <p><strong>Date Issued:</strong> July 16, 2024</p>
+    <p><strong>Abstract:</strong> Optimizes AV battery usage & assistance.</p>
+  </div>
+</div>
+<br>
+
+<!-- Patent Entry 6 -->
+<div class="patent-entry block-bg">
+  <h4><a href="https://patents.google.com/patent/US11991346B2" target="_blank" style="color: white; text-decoration: none;">
+        <strong>[US-11991346-B2]</strong>
+      </a> - Video Streaming Anomaly Detection</h4>
+  <div class="patent-image">
+    <a href="https://patents.google.com/patent/US11991346B2" target="_blank">
+      <img src="https://lh3.googleusercontent.com/sZ2UgZE7oDgWT0N3AoFDvHIGbC6YK1ySseHBklVmVwNq0qsRFiJ7UMf0B_31fhQyRy1Fi8r2dTXyODXlVE0afWCJ1h75fPP-Y9yzN8fn1qcWiXY2Ty1tj-Ol5hVmS_69zg=w1280" alt="US11991346B2 Patent">
+    </a>
+  </div>
+  <div class="patent-content">
+    <p><strong>Date Issued:</strong> May 21, 2024</p>
+    <p><strong>Abstract:</strong> Monitors multiple video feeds for anomalies.</p>
+  </div>
+</div>
+<br>
+
+<!-- Patent Entry 7 -->
+<div class="patent-entry block-bg">
+  <h4><a href="https://patents.google.com/patent/US11880867B2" target="_blank" style="color: white; text-decoration: none;">
+        <strong>[US-11880867-B2]</strong>
+      </a> - Systems for Providing Targeted Content</h4>
+  <div class="patent-image">
+    <a href="https://patents.google.com/patent/US11880867B2" target="_blank">
+      <img src="https://lh3.googleusercontent.com/sZ2UgZE7oDgWT0N3AoFDvHIGbC6YK1ySseHBklVmVwNq0qsRFiJ7UMf0B_31fhQyRy1Fi8r2dTXyODXlVE0afWCJ1h75fPP-Y9yzN8fn1qcWiXY2Ty1tj-Ol5hVmS_69zg=w1280" alt="US11880867B2 Patent">
+    </a>
+  </div>
+  <div class="patent-content">
+    <p><strong>Date Issued:</strong> January 23, 2024</p>
+    <p><strong>Abstract:</strong> Personalized content via sensor data.</p>
+  </div>
+</div>
+<br>
+
+<!-- Patent Entry 8 -->
+<div class="patent-entry block-bg">
+  <h4><a href="https://patents.google.com/patent/US20230370822A1" target="_blank" style="color: white; text-decoration: none;">
+        <strong>[US-20230370822-A1]</strong>
+      </a> - Adaptively Selecting Network APN</h4>
+  <div class="patent-image">
+    <a href="https://patents.google.com/patent/US20230370822A1" target="_blank">
+      <img src="https://lh3.googleusercontent.com/sZ2UgZE7oDgWT0N3AoFDvHIGbC6YK1ySseHBklVmVwNq0qsRFiJ7UMf0B_31fhQyRy1Fi8r2dTXyODXlVE0afWCJ1h75fPP-Y9yzN8fn1qcWiXY2Ty1tj-Ol5hVmS_69zg=w1280" alt="US20230370822A1 Patent">
+    </a>
+  </div>
+  <div class="patent-content">
+    <p><strong>Date Issued:</strong> November 16, 2023</p>
+    <p><strong>Abstract:</strong> APNs assigned to vehicle apps dynamically.</p>
+  </div>
+</div>
+<br>
+
+<!-- Patent Entry 9 -->
+<div class="patent-entry block-bg">
+  <h4><a href="https://patents.google.com/patent/US11812355B2" target="_blank" style="color: white; text-decoration: none;">
+        <strong>[US-11812355-B2]</strong>
+      </a> - Drone-based Vehicle Connectivity</h4>
+  <div class="patent-image">
+    <a href="https://patents.google.com/patent/US11812355B2" target="_blank">
+      <img src="https://lh3.googleusercontent.com/sZ2UgZE7oDgWT0N3AoFDvHIGbC6YK1ySseHBklVmVwNq0qsRFiJ7UMf0B_31fhQyRy1Fi8r2dTXyODXlVE0afWCJ1h75fPP-Y9yzN8fn1qcWiXY2Ty1tj-Ol5hVmS_69zg=w1280" alt="US11812355B2 Patent">
+    </a>
+  </div>
+  <div class="patent-content">
+    <p><strong>Date Issued:</strong> November 7, 2023</p>
+    <p><strong>Abstract:</strong> Uses drones to restore coverage in outages.</p>
+  </div>
+</div>
+<br>
+
+<!-- Patent Entry 10 -->
+<div class="patent-entry block-bg">
+  <h4><a href="https://patents.google.com/patent/US11750393B2" target="_blank" style="color: white; text-decoration: none;">
+        <strong>[US-11750393-B2]</strong>
+      </a> - Secure Broadcast Delivery & Verification</h4>
+  <div class="patent-image">
+    <a href="https://patents.google.com/patent/US11750393B2" target="_blank">
+      <img src="https://lh3.googleusercontent.com/sZ2UgZE7oDgWT0N3AoFDvHIGbC6YK1ySseHBklVmVwNq0qsRFiJ7UMf0B_31fhQyRy1Fi8r2dTXyODXlVE0afWCJ1h75fPP-Y9yzN8fn1qcWiXY2Ty1tj-Ol5hVmS_69zg=w1280" alt="US11750393B2 Patent">
+    </a>
+  </div>
+  <div class="patent-content">
+    <p><strong>Date Issued:</strong> September 5, 2023</p>
+    <p><strong>Abstract:</strong> Nonce-based hash verification.</p>
+  </div>
+</div>
+<br>
+
+<!-- Patent Entry 11 -->
+<div class="patent-entry block-bg">
+  <h4><a href="https://patents.google.com/patent/US20230237529A1" target="_blank" style="color: white; text-decoration: none;">
+        <strong>[US-20230237529-A1]</strong>
+      </a> - Systems for Providing Targeted Content</h4>
+  <div class="patent-image">
+    <a href="https://patents.google.com/patent/US20230237529A1" target="_blank">
+      <img src="https://lh3.googleusercontent.com/sZ2UgZE7oDgWT0N3AoFDvHIGbC6YK1ySseHBklVmVwNq0qsRFiJ7UMf0B_31fhQyRy1Fi8r2dTXyODXlVE0afWCJ1h75fPP-Y9yzN8fn1qcWiXY2Ty1tj-Ol5hVmS_69zg=w1280" alt="US20230237529A1 Patent">
+    </a>
+  </div>
+  <div class="patent-content">
+    <p><strong>Date Issued:</strong> July 27, 2023</p>
+    <p><strong>Abstract:</strong> Location-aware content recommendations.</p>
+  </div>
+</div>
+<br>
+
+<!-- Patent Entry 12 -->
+<div class="patent-entry block-bg">
+  <h4><a href="https://patents.google.com/patent/US20230195105A1" target="_blank" style="color: white; text-decoration: none;">
+        <strong>[US-20230195105-A1]</strong>
+      </a> - Remote Driving a Plurality of Vehicles</h4>
+  <div class="patent-image">
+    <a href="https://patents.google.com/patent/US20230195105A1" target="_blank">
+      <img src="https://lh3.googleusercontent.com/sZ2UgZE7oDgWT0N3AoFDvHIGbC6YK1ySseHBklVmVwNq0qsRFiJ7UMf0B_31fhQyRy1Fi8r2dTXyODXlVE0afWCJ1h75fPP-Y9yzN8fn1qcWiXY2Ty1tj-Ol5hVmS_69zg=w1280" alt="US20230195105A1 Patent">
+    </a>
+  </div>
+  <div class="patent-content">
+    <p><strong>Date Issued:</strong> June 22, 2023</p>
+    <p><strong>Abstract:</strong> Broadcasts remote-driving commands.</p>
+  </div>
+</div>
+<br>
+
+<!-- Patent Entry 13 -->
+<div class="patent-entry block-bg">
+  <h4><a href="https://patents.google.com/patent/US20230156179A1" target="_blank" style="color: white; text-decoration: none;">
+        <strong>[US-20230156179-A1]</strong>
+      </a> - Video Streaming Anomaly Detection</h4>
+  <div class="patent-image">
+    <a href="https://patents.google.com/patent/US20230156179A1" target="_blank">
+      <img src="https://lh3.googleusercontent.com/sZ2UgZE7oDgWT0N3AoFDvHIGbC6YK1ySseHBklVmVwNq0qsRFiJ7UMf0B_31fhQyRy1Fi8r2dTXyODXlVE0afWCJ1h75fPP-Y9yzN8fn1qcWiXY2Ty1tj-Ol5hVmS_69zg=w1280" alt="US20230156179A1 Patent">
+    </a>
+  </div>
+  <div class="patent-content">
+    <p><strong>Date Issued:</strong> May 18, 2023</p>
+    <p><strong>Abstract:</strong> Detects dropped/stale frames.</p>
+  </div>
+</div>
+<br>
+
+<!-- Patent Entry 14 -->
+<div class="patent-entry block-bg">
+  <h4><a href="https://patents.google.com/patent/US20230110300A1" target="_blank" style="color: white; text-decoration: none;">
+        <strong>[US-20230110300-A1]</strong>
+      </a> - Electric Autonomous Vehicle Ride</h4>
+  <div class="patent-image">
+    <a href="https://patents.google.com/patent/US20230110300A1" target="_blank">
+      <img src="https://lh3.googleusercontent.com/sZ2UgZE7oDgWT0N3AoFDvHIGbC6YK1ySseHBklVmVwNq0qsRFiJ7UMf0B_31fhQyRy1Fi8r2dTXyODXlVE0afWCJ1h75fPP-Y9yzN8fn1qcWiXY2Ty1tj-Ol5hVmS_69zg=w1280" alt="US20230110300A1 Patent">
+    </a>
+  </div>
+  <div class="patent-content">
+    <p><strong>Date Issued:</strong> April 13, 2023</p>
+    <p><strong>Abstract:</strong> AVs share capabilities for recharging.</p>
+  </div>
+</div>
+<br>
+
+<!-- Patent Entry 15 -->
+<div class="patent-entry block-bg">
+  <h4><a href="https://patents.google.com/patent/US11551456B2" target="_blank" style="color: white; text-decoration: none;">
+        <strong>[US-11551456-B2]</strong>
+      </a> - Enhanced Infrastructure</h4>
+  <div class="patent-image">
+    <a href="https://patents.google.com/patent/US11551456B2" target="_blank">
+      <img src="https://lh3.googleusercontent.com/sZ2UgZE7oDgWT0N3AoFDvHIGbC6YK1ySseHBklVmVwNq0qsRFiJ7UMf0B_31fhQyRy1Fi8r2dTXyODXlVE0afWCJ1h75fPP-Y9yzN8fn1qcWiXY2Ty1tj-Ol5hVmS_69zg=w1280" alt="US11551456B2 Patent">
+    </a>
+  </div>
+  <div class="patent-content">
+    <p><strong>Date Issued:</strong> January 10, 2023</p>
+    <p><strong>Abstract:</strong> Fixed cameras support AV geolocation.</p>
+  </div>
+</div>
+<br>
+
+<!-- Patent Entry 16 -->
+<div class="patent-entry block-bg">
+  <h4><a href="https://patents.google.com/patent/US20220377519A1" target="_blank" style="color: white; text-decoration: none;">
+        <strong>[US-20220377519-A1]</strong>
+      </a> - Drone-based Vehicle Connectivity</h4>
+  <div class="patent-image">
+    <a href="https://patents.google.com/patent/US20220377519A1" target="_blank">
+      <img src="https://lh3.googleusercontent.com/sZ2UgZE7oDgWT0N3AoFDvHIGbC6YK1ySseHBklVmVwNq0qsRFiJ7UMf0B_31fhQyRy1Fi8r2dTXyODXlVE0afWCJ1h75fPP-Y9yzN8fn1qcWiXY2Ty1tj-Ol5hVmS_69zg=w1280" alt="US20220377519A1 Patent">
+    </a>
+  </div>
+  <div class="patent-content">
+    <p><strong>Date Issued:</strong> November 24, 2022</p>
+    <p><strong>Abstract:</strong> Launches drones for emergency communications.</p>
+  </div>
+</div>
+<br>
+
+<!-- Patent Entry 17 -->
+<div class="patent-entry block-bg">
+  <h4><a href="https://patents.google.com/patent/US20220321352A1" target="_blank" style="color: white; text-decoration: none;">
+        <strong>[US-20220321352-A1]</strong>
+      </a> - Secure Broadcast Delivery</h4>
+  <div class="patent-image">
+    <a href="https://patents.google.com/patent/US20220321352A1" target="_blank">
+      <img src="https://lh3.googleusercontent.com/sZ2UgZE7oDgWT0N3AoFDvHIGbC6YK1ySseHBklVmVwNq0qsRFiJ7UMf0B_31fhQyRy1Fi8r2dTXyODXlVE0afWCJ1h75fPP-Y9yzN8fn1qcWiXY2Ty1tj-Ol5hVmS_69zg=w1280" alt="US20220321352A1 Patent">
+    </a>
+  </div>
+  <div class="patent-content">
+    <p><strong>Date Issued:</strong> October 6, 2022</p>
+    <p><strong>Abstract:</strong> Random-nonce-based broadcast verification.</p>
+  </div>
+</div>
+<br>
+
+<!-- Patent Entry 18 -->
+<div class="patent-entry block-bg">
+  <h4><a href="https://patents.google.com/patent/US11395107B1" target="_blank" style="color: white; text-decoration: none;">
+        <strong>[US-11395107-B1]</strong>
+      </a> - Multicast Assisted Parking</h4>
+  <div class="patent-image">
+    <a href="https://patents.google.com/patent/US11395107B1" target="_blank">
+      <img src="https://lh3.googleusercontent.com/sZ2UgZE7oDgWT0N3AoFDvHIGbC6YK1ySseHBklVmVwNq0qsRFiJ7UMf0B_31fhQyRy1Fi8r2dTXyODXlVE0afWCJ1h75fPP-Y9yzN8fn1qcWiXY2Ty1tj-Ol5hVmS_69zg=w1280" alt="US11395107B1 Patent">
+    </a>
+  </div>
+  <div class="patent-content">
+    <p><strong>Date Issued:</strong> July 19, 2022</p>
+    <p><strong>Abstract:</strong> Reduces unicast data load using point-to-multipoint.</p>
+  </div>
+</div>
+<br>
+
+<!-- Patent Entry 19 -->
+<div class="patent-entry block-bg">
+  <h4><a href="https://patents.google.com/patent/US20220176986A1" target="_blank" style="color: white; text-decoration: none;">
+        <strong>[US-20220176986-A1]</strong>
+      </a> - Adaptive Guidance for Group Travel</h4>
+  <div class="patent-image">
+    <a href="https://patents.google.com/patent/US20220176986A1" target="_blank">
+      <img src="https://lh3.googleusercontent.com/sZ2UgZE7oDgWT0N3AoFDvHIGbC6YK1ySseHBklVmVwNq0qsRFiJ7UMf0B_31fhQyRy1Fi8r2dTXyODXlVE0afWCJ1h75fPP-Y9yzN8fn1qcWiXY2Ty1tj-Ol5hVmS_69zg=w1280" alt="US20220176986A1 Patent">
+    </a>
+  </div>
+  <div class="patent-content">
+    <p><strong>Date Issued:</strong> June 9, 2022</p>
+    <p><strong>Abstract:</strong> Groups vehicles by driving styles.</p>
+  </div>
+</div>
+<br>
+
+<!-- Patent Entry 20 -->
+<div class="patent-entry block-bg">
+  <h4><a href="https://patents.google.com/patent/US11210943B2" target="_blank" style="color: white; text-decoration: none;">
+        <strong>[US-11210943-B2]</strong>
+      </a> - Edge Computing Aided Radio Congestion</h4>
+  <div class="patent-image">
+    <a href="https://patents.google.com/patent/US11210943B2" target="_blank">
+      <img src="https://lh3.googleusercontent.com/sZ2UgZE7oDgWT0N3AoFDvHIGbC6YK1ySseHBklVmVwNq0qsRFiJ7UMf0B_31fhQyRy1Fi8r2dTXyODXlVE0afWCJ1h75fPP-Y9yzN8fn1qcWiXY2Ty1tj-Ol5hVmS_69zg=w1280" alt="US11210943B2 Patent">
+    </a>
+  </div>
+  <div class="patent-content">
+    <p><strong>Date Issued:</strong> December 28, 2021</p>
+    <p><strong>Abstract:</strong> Manages geofenced traffic via resource allocation.</p>
+  </div>
+</div>
+<br>
+
+<!-- Patent Entry 21 -->
+<div class="patent-entry block-bg">
+  <h4><a href="https://patents.google.com/patent/US20210397853A1" target="_blank" style="color: white; text-decoration: none;">
+        <strong>[US-20210397853-A1]</strong>
+      </a> - Enhanced Infrastructure</h4>
+  <div class="patent-image">
+    <a href="https://patents.google.com/patent/US20210397853A1" target="_blank">
+      <img src="https://lh3.googleusercontent.com/sZ2UgZE7oDgWT0N3AoFDvHIGbC6YK1ySseHBklVmVwNq0qsRFiJ7UMf0B_31fhQyRy1Fi8r2dTXyODXlVE0afWCJ1h75fPP-Y9yzN8fn1qcWiXY2Ty1tj-Ol5hVmS_69zg=w1280" alt="US20210397853A1 Patent">
+    </a>
+  </div>
+  <div class="patent-content">
+    <p><strong>Date Issued:</strong> December 23, 2021</p>
+    <p><strong>Abstract:</strong> Infrastructure cameras assist AV geo-coordinates.</p>
+  </div>
+</div>
+<br>
+
+<!-- Patent Entry 22 -->
+<div class="patent-entry block-bg">
+  <h4><a href="https://patents.google.com/patent/US20210272454A1" target="_blank" style="color: white; text-decoration: none;">
+        <strong>[US-20210272454-A1]</strong>
+      </a> - Edge Computing Aided Radio Congestion</h4>
+  <div class="patent-image">
+    <a href="https://patents.google.com/patent/US20210272454A1" target="_blank">
+      <img src="https://lh3.googleusercontent.com/sZ2UgZE7oDgWT0N3AoFDvHIGbC6YK1ySseHBklVmVwNq0qsRFiJ7UMf0B_31fhQyRy1Fi8r2dTXyODXlVE0afWCJ1h75fPP-Y9yzN8fn1qcWiXY2Ty1tj-Ol5hVmS_69zg=w1280" alt="US20210272454A1 Patent">
+    </a>
+  </div>
+  <div class="patent-content">
+    <p><strong>Date Issued:</strong> September 2, 2021</p>
+    <p><strong>Abstract:</strong> Instructs low-priority services to pause.</p>
+  </div>
+</div>
+<br>
+
+<!-- Patent Entry 23 -->
+<div class="patent-entry block-bg">
+  <h4><a href="https://patents.google.com/patent/US10542493B2" target="_blank" style="color: white; text-decoration: none;">
+        <strong>[US-10542493-B2]</strong>
+      </a> - Vehicle Communications Management</h4>
+  <div class="patent-image">
+    <a href="https://patents.google.com/patent/US10542493B2" target="_blank">
+      <img src="https://lh3.googleusercontent.com/sZ2UgZE7oDgWT0N3AoFDvHIGbC6YK1ySseHBklVmVwNq0qsRFiJ7UMf0B_31fhQyRy1Fi8r2dTXyODXlVE0afWCJ1h75fPP-Y9yzN8fn1qcWiXY2Ty1tj-Ol5hVmS_69zg=w1280" alt="US10542493B2 Patent">
+    </a>
+  </div>
+  <div class="patent-content">
+    <p><strong>Date Issued:</strong> January 21, 2020</p>
+    <p><strong>Abstract:</strong> Manages multiple in-vehicle modems.</p>
+  </div>
+</div>
+<br>
+
+<!-- Patent Entry 24 -->
+<div class="patent-entry block-bg">
+  <h4><a href="https://patents.google.com/patent/US10305527B2" target="_blank" style="color: white; text-decoration: none;">
+        <strong>[US-10305527-B2]</strong>
+      </a> - Communicatively Coupling Mobile Devices</h4>
+  <div class="patent-image">
+    <a href="https://patents.google.com/patent/US10305527B2" target="_blank">
+      <img src="https://lh3.googleusercontent.com/sZ2UgZE7oDgWT0N3AoFDvHIGbC6YK1ySseHBklVmVwNq0qsRFiJ7UMf0B_31fhQyRy1Fi8r2dTXyODXlVE0afWCJ1h75fPP-Y9yzN8fn1qcWiXY2Ty1tj-Ol5hVmS_69zg=w1280" alt="US10305527B2 Patent">
+    </a>
+  </div>
+  <div class="patent-content">
+    <p><strong>Date Issued:</strong> May 28, 2019</p>
+    <p><strong>Abstract:</strong> Switches antennas based on device location.</p>
+  </div>
+</div>
+<br>
+
+<!-- Patent Entry 25 -->
+<div class="patent-entry block-bg">
+  <h4><a href="https://patents.google.com/patent/US20190007900A1" target="_blank" style="color: white; text-decoration: none;">
+        <strong>[US-20190007900-A1]</strong>
+      </a> - Vehicle Communications Management</h4>
+  <div class="patent-image">
+    <a href="https://patents.google.com/patent/US20190007900A1" target="_blank">
+      <img src="https://lh3.googleusercontent.com/sZ2UgZE7oDgWT0N3AoFDvHIGbC6YK1ySseHBklVmVwNq0qsRFiJ7UMf0B_31fhQyRy1Fi8r2dTXyODXlVE0afWCJ1h75fPP-Y9yzN8fn1qcWiXY2Ty1tj-Ol5hVmS_69zg=w1280" alt="US20190007900A1 Patent">
+    </a>
+  </div>
+  <div class="patent-content">
+    <p><strong>Date Issued:</strong> January 3, 2019</p>
+    <p><strong>Abstract:</strong> Wakes primary modem from low-power state.</p>
+  </div>
+</div>
+<br>
+
+<!-- Patent Entry 26 -->
+<div class="patent-entry block-bg">
+  <h4><a href="https://patents.google.com/patent/US20180213414A1" target="_blank" style="color: white; text-decoration: none;">
+        <strong>[US-20180213414-A1]</strong>
+      </a> - Communicatively Coupling Mobile Devices</h4>
+  <div class="patent-image">
+    <a href="https://patents.google.com/patent/US20180213414A1" target="_blank">
+      <img src="https://lh3.googleusercontent.com/sZ2UgZE7oDgWT0N3AoFDvHIGbC6YK1ySseHBklVmVwNq0qsRFiJ7UMf0B_31fhQyRy1Fi8r2dTXyODXlVE0afWCJ1h75fPP-Y9yzN8fn1qcWiXY2Ty1tj-Ol5hVmS_69zg=w1280" alt="US20180213414A1 Patent">
+    </a>
+  </div>
+  <div class="patent-content">
+    <p><strong>Date Issued:</strong> July 26, 2018</p>
+    <p><strong>Abstract:</strong> Optimizes connectivity via internal/external antennas.</p>
+  </div>
+</div>
+<br>
+
+	
+	<br><br><br><br>
+    <!-- International Patents -->
+    <h3>International Patents</h3>
+
+    <!-- International Patent Entry -->
+    <div class="patent-entry block-bg">
+      <div class="patent-image">
+        <!-- Using placeholder image for international patent -->
+        <a href="https://patents.google.com/patent/UA64952" target="_blank">
+          <img src="https://lh3.googleusercontent.com/sZ2UgZE7oDgWT0N3AoFDvHIGbC6YK1ySseHBklVmVwNq0qsRFiJ7UMf0B_31fhQyRy1Fi8r2dTXyODXlVE0afWCJ1h75fPP-Y9yzN8fn1qcWiXY2Ty1tj-Ol5hVmS_69zg=w1280" alt="UA64952 Patent">
+        </a>
+      </div>
+      <div class="patent-content">
+        <h4>
+          <a href="https://patents.google.com/patent/UA64952" target="_blank">
+            <strong>UA 64952 – Trap for Rodents</strong>
+          </a>
+        </h4>
+        <p>Date Issued: March 15, 2004<br>
+           Uses a swiveling base and fulcrum in a hollow container to safely capture rodents. Recognized as the youngest patent holder in Ukraine for early innovation at age 9.
+        </p>
+      </div>
+    </div>
+	
+
+  </div>
+</section>
+
+
+  <!-- Leadership (One column) -->
+  <section id="leadership">
+    <div class="container">
+      <h2>Volunteer Experience</h2>
+      <div class="block-bg">
+        <ul>
+          <li><strong>MATHCOUNTS Foundation:</strong> Organized math competitions, mentored students, handled scoring.</li>
+          <li><strong>Northville Civic Concern:</strong> Sorted/organized donations for local families in need.</li>
+        </ul>
+      </div>
+	  <br><br><br><br>
+	  <h2>Organizations</h2>
+      <div class="block-bg">
+        <h4>Tau Beta Pi – Engineering Honor Society</h4>
+        <p>President, Secretary, Advisor (2014 – 2016). Led workshops, mentorships, service projects.</p>
+        <h4>Theta Tau – Professional Engineering Fraternity</h4>
+        <p>Vice President, Pledge Educator (2012 – 2016). Oversaw operations, events, leadership training.</p>
+        <h4>DCE – Dearborn Campus Engineers</h4>
+        <p>Vice President, Treasurer, Trustee (2012 – 2016). Managed finances and events for engineering community.</p>
+      </div>
+	  <br><br><br><br>
+	  <h2>Additional Information</h2>
+      <div class="block-bg" style="margin-top:2rem;">
+        <p>
+          <strong>Languages:</strong> English (Fluent), Ukrainian (Fluent), Russian (Fluent), German (5 years of study)<br>
+          <strong>Volunteer Work:</strong> MATHCOUNTS Foundation, Northville Civic Concern, CYM USA (Ukrainian American Youth Association)<br>
+          <strong>Interests:</strong> AI, Blockchain, Cyber-Physical Systems, GNSS Augmentation, High-Frequency RF Systems, 
+          Advanced Robotics, Edge Compute, Smart City Infrastructure
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact (One column, image above input) -->
+  <section id="contact">
+    <div class="container">
+      <h2>Contact</h2>
+      <div class="block-bg">
+        <img src="https://lh3.googleusercontent.com/sZ2UgZE7oDgWT0N3AoFDvHIGbC6YK1ySseHBklVmVwNq0qsRFiJ7UMf0B_31fhQyRy1Fi8r2dTXyODXlVE0afWCJ1h75fPP-Y9yzN8fn1qcWiXY2Ty1tj-Ol5hVmS_69zg=w1280" alt="Contact Placeholder" class="rounded-image">
+        <p>Please reach out if you'd like to collaborate on cutting-edge engineering, AV tech, or secure mobility solutions.</p>
+        <form id="contact-form">
+          <input type="email" id="email" name="email" placeholder="Your Email" required>
+          <button type="submit">Submit</button>
+        </form>
+      </div>
+    </div>
+	<br><br><br><br><br><br><br><br><br><br>
+  </section>
+
+  <footer>&copy; 2025 Vlad Slyusar — All rights reserved.</footer>
+
+  <!-- Scripts (unchanged 3D functionality) -->
+  <script>
+    // Setup
+    const r = new THREE.WebGLRenderer({antialias:true}), c = document.getElementById('webgl-bg');
+    r.setSize(window.innerWidth, window.innerHeight);
+    c.replaceWith(r.domElement); 
+    r.domElement.id = 'webgl-bg';
+    if(window.innerWidth > 800){
+      r.shadowMap.enabled=true; 
+      r.shadowMap.type=THREE.PCFSoftShadowMap; 
+      r.shadowMap.needsUpdate=true;
+    }
+    const s = new THREE.Scene(); 
+    s.background = new THREE.Color(0x7B61FF); https://lh3.googleusercontent.com/sZ2UgZE7oDgWT0N3AoFDvHIGbC6YK1ySseHBklVmVwNq0qsRFiJ7UMf0B_31fhQyRy1Fi8r2dTXyODXlVE0afWCJ1h75fPP-Y9yzN8fn1qcWiXY2Ty1tj-Ol5hVmS_69zg=w1280
+    s.fog = new THREE.Fog(0x7B61FF, 10, 16);
+
+    const fogOrig = {near:10, far:60}, fogRed = {near:1000, far:10000}, fogTgt = {near:10, far:16};
+    const cam = new THREE.PerspectiveCamera(30, window.innerWidth/window.innerHeight,1,500);
+    cam.position.set(10,15,10); 
+    cam.lookAt(0,0,0);
+
+    // City
+    const city = new THREE.Object3D(); 
+    s.add(city);
+    const smoke = new THREE.Object3D(); 
+    city.add(smoke);
+    const town = new THREE.Object3D(); 
+    city.add(town);
+    const blds = [];
+    function rand(num=8){ return -Math.random()*num + Math.random()*num }
+    let tintFlag=true; 
+    function tint(){ tintFlag=!tintFlag; return tintFlag?0x111111:0x333333 }
+    function free(x,z,arr,md){ return !arr.some(p=> (p.x-x)**2 + (p.z-z)**2 < md**2) }
+
+    function initCity(){
+      const cnt=80, minD=0.8, seg=2; 
+      const placed=[];
+      for(let i=0;i<cnt;i++){
+        const geom = new THREE.BoxGeometry(1,1,1,seg,seg,seg);
+        const mat = new THREE.MeshStandardMaterial({color:tint(), side:THREE.DoubleSide});
+        const wmat = new THREE.MeshLambertMaterial({
+          color:0xffffff, wireframe:true, 
+          transparent:true, opacity:0.05, side:THREE.DoubleSide
+        });
+        const cube = new THREE.Mesh(geom, mat); 
+        const wire = new THREE.Mesh(geom, wmat);
+        const floor = new THREE.Mesh(geom, mat); 
+        const wf = new THREE.Mesh(geom, wmat);
+        cube.add(wire); 
+        cube.add(wf); 
+        cube.castShadow=true; 
+        cube.receiveShadow=true;
+        const h = 0.1 + Math.abs(rand(8)); 
+        cube.scale.y = h; 
+        cube.userData.h = h;
+        blds.push(cube);
+        cube.scale.x = cube.scale.z = 0.9 + rand(1-0.9);
+        let placedFlag=false, a=0;
+        while(!placedFlag && a++ <1000){
+          const rx=Math.round(rand(15)), rz=Math.round(rand(15));
+          if(free(rx,rz,placed,minD)){
+            cube.position.set(rx,h/2,rz); 
+            floor.position.set(rx,0,rz); 
+            placed.push({x:rx,z:rz}); 
+            placedFlag=true;
+          }
+        }
+        floor.scale.y=0.05; 
+        town.add(floor); 
+        town.add(cube);
+      }
+      // Smoke
+      const gmat = new THREE.MeshToonMaterial({color:0xffff00, side:THREE.DoubleSide});
+      const ggeo = new THREE.CircleGeometry(0.01,3); 
+      const apart=5;
+      for(let h=1; h<300; h++){
+        const p = new THREE.Mesh(ggeo, gmat);
+        p.position.set(rand(apart), Math.abs(rand(2)), rand(apart));
+        p.rotation.set(rand(), rand(), rand());
+        smoke.add(p);
+      }
+      // Ground
+      const pmat = new THREE.MeshPhongMaterial({
+        color:0x000000, side:THREE.DoubleSide, roughness:10, 
+        metalness:0.6, opacity:0.9, transparent:true
+      });
+      const pgeo = new THREE.PlaneGeometry(60,60);
+      const pe = new THREE.Mesh(pgeo, pmat);
+      pe.rotation.x=-Math.PI/2; 
+      pe.position.y=-0.001; 
+      pe.receiveShadow=true; 
+      city.add(pe);
+    }
+    initCity();
+
+    // Lights
+    const aLight = new THREE.AmbientLight(0xffffff,4);
+    const lFront = new THREE.SpotLight(0xffffff,20,10);
+    lFront.rotation.x=45*Math.PI/180; 
+    lFront.rotation.z=-45*Math.PI/180;
+    lFront.position.set(5,5,5); 
+    lFront.castShadow=true;
+    lFront.shadow.mapSize.width=6000; 
+    lFront.shadow.mapSize.height=6000; 
+    lFront.penumbra=0.1;
+    const lBack = new THREE.PointLight(0xffffff,0.5); 
+    lBack.position.set(0,6,0);
+    s.add(aLight); 
+    city.add(lFront); 
+    s.add(lBack);
+
+    // Fast Lines
+    const fl=[]; 
+    const dirs=["z+","z-","x+","x-"]; 
+    const lc=25, rng=20;
+    function createLines(){
+      for(let i=0;i<lc;i++){
+        const g = new THREE.BoxGeometry(0.02,0.02,Math.random()*1+0.4);
+        const m = new THREE.MeshToonMaterial({color:0xffff00, side:THREE.DoubleSide});
+        const mesh = new THREE.Mesh(g,m); 
+        mesh.castShadow=true; 
+        mesh.receiveShadow=true;
+        mesh.userData.dir = dirs[Math.floor(Math.random()*dirs.length)];
+        switch(mesh.userData.dir){
+          case "z+":
+            mesh.position.set(rand(3), Math.abs(rand(2)), -rng);
+            break;
+          case "z-":
+            mesh.position.set(rand(3), Math.abs(rand(2)), rng);
+            break;
+          case "x+":
+            mesh.rotation.y=Math.PI*0.5;
+            mesh.position.set(-rng, Math.abs(rand(2)), rand(3));
+            break;
+          case "x-":
+            mesh.rotation.y=Math.PI*0.5;
+            mesh.position.set(rng, Math.abs(rand(2)), rand(3));
+            break;
+        }
+        fl.push(mesh);
+        city.add(mesh);
+      }
+    }
+    createLines();
+
+    // Camera Movement
+    const sections = ["#resume3d","#intro","#school","#work","#projects","#publications","#leadership","#contact"];
+    const vps = [
+      {pos:new THREE.Vector3(0,60,0), la:new THREE.Vector3(0,0,0)},
+      {pos:new THREE.Vector3(10,15,10), la:new THREE.Vector3(0,0,0)},
+      {pos:new THREE.Vector3(-5,10,12), la:new THREE.Vector3(-1,0,2)},
+      {pos:new THREE.Vector3(8,8,-2), la:new THREE.Vector3(5,0,-2)},
+      {pos:new THREE.Vector3(-8,8,-8), la:new THREE.Vector3(-4,0,-3)},
+      {pos:new THREE.Vector3(10,6,-10), la:new THREE.Vector3(6,0,-7)},
+      {pos:new THREE.Vector3(15,12,15), la:new THREE.Vector3(0,0,0)},
+      {pos:new THREE.Vector3(25,22,25), la:new THREE.Vector3(0,0,0)}
+    ];
+    let offsets = [];
+    function calcOffsets(){ offsets = sections.map(s=>document.querySelector(s).offsetTop) }
+    calcOffsets(); 
+    window.addEventListener('resize', calcOffsets);
+
+    function scrollFrac(){
+      return (window.scrollY)/(document.body.scrollHeight - window.innerHeight) || 0
+    }
+    function camTarget(){
+      const n = vps.length, fr = scrollFrac()*(n-1);
+      const i = Math.floor(fr), lf = fr-i;
+      if(i >= n-1) return vps[n-1];
+      const v1 = vps[i], v2 = vps[i+1];
+      return {
+        pos:v1.pos.clone().lerp(v2.pos, lf),
+        la:v1.la.clone().lerp(v2.la, lf)
+      }
+    }
+
+    // Event Listeners
+    window.addEventListener('resize', ()=>{
+      r.setSize(window.innerWidth, window.innerHeight);
+      cam.aspect = window.innerWidth/window.innerHeight; 
+      cam.updateProjectionMatrix();
+      calcOffsets();
+    });
+
+    const mousePos = new THREE.Vector2();
+    window.addEventListener('mousemove', e=>{
+      mousePos.x=(e.clientX/window.innerWidth)*2-1; 
+      mousePos.y=-(e.clientY/window.innerHeight)*2+1;
+    }, false);
+
+    const fade = document.getElementById("scroll-fade");
+    window.addEventListener('scroll', ()=>{
+      const sy = window.scrollY;
+      fade.style.opacity = sy > 200 ? "0" : String(1 - sy/200);
+      fogTgt.near = fogOrig.near;
+      fogTgt.far = fogOrig.far;
+    });
+
+    document.getElementById('email').addEventListener('focus', ()=>{
+      fogTgt.near = fogRed.near;
+      fogTgt.far = fogRed.far;
+    });
+
+    let isScroll = false;
+    window.addEventListener('scroll', () => {
+      const sy = window.scrollY;
+      const introY = document.querySelector("#intro").offsetTop;
+      const scrollFraction = sy / (document.body.scrollHeight - window.innerHeight);
+
+      if (sy <= introY) {
+        // Preserve intro effect for top
+        const prog = sy / introY;
+        fogTgt.near = THREE.MathUtils.lerp(50, fogOrig.near, prog);
+        fogTgt.far = THREE.MathUtils.lerp(80, fogOrig.far, prog);
+      } else {
+        // Adjust fog after intro
+        fogTgt.near = fogOrig.near;
+        fogTgt.far = THREE.MathUtils.lerp(fogOrig.far, 35, scrollFraction);
+      }
+    });
+
+    // Animation
+    function animate(){
+      requestAnimationFrame(animate);
+      if(!isScroll){
+        const speed=0.001;
+        city.rotation.y -= ((mousePos.x*8) - cam.rotation.y)*speed;
+        city.rotation.x=0;
+      }
+      const sp=0.2;
+      fl.forEach(l=>{
+        switch(l.userData.dir){
+          case 'z+':
+            l.position.z += sp; 
+            if(l.position.z > rng){ 
+              l.position.z=-rng; 
+              l.position.y=Math.abs(rand(2)); 
+            }
+            break;
+          case 'z-':
+            l.position.z -= sp; 
+            if(l.position.z < -rng){ 
+              l.position.z=rng; 
+              l.position.y=Math.abs(rand(2)); 
+            }
+            break;
+          case 'x+':
+            l.position.x += sp; 
+            if(l.position.x > rng){ 
+              l.position.x=-rng; 
+              l.position.y=Math.abs(rand(2)); 
+            }
+            break;
+          case 'x-':
+            l.position.x -= sp; 
+            if(l.position.x < -rng){ 
+              l.position.x=rng; 
+              l.position.y=Math.abs(rand(2)); 
+            }
+            break;
+        }
+      });
+
+      const ct = camTarget();
+      cam.position.lerp(ct.pos, 0.08);
+      const dir = new THREE.Vector3().subVectors(ct.la, cam.position).normalize();
+      cam.lookAt(cam.position.clone().add(dir));
+
+      const sf = 0.5 + scrollFrac()*1.0;
+      blds.forEach(b=>{
+        b.scale.y = b.userData.h * sf;
+        b.position.y = (b.userData.h * sf)/2;
+      });
+
+      s.fog.near = THREE.MathUtils.lerp(s.fog.near, fogTgt.near, 0.05);
+      s.fog.far = THREE.MathUtils.lerp(s.fog.far, fogTgt.far, 0.05);
+      r.render(s, cam);
+    }
+    animate();
+
+    // Menu
+    document.getElementById('hamburger').addEventListener('click', ()=>{
+      const navC = document.getElementById('nav-links');
+      navC.classList.toggle('active');
+      const act = navC.classList.contains('active'); 
+      document.getElementById('hamburger').setAttribute('aria-expanded', act);
+    });
+
+    // Initial Scroll
+    document.addEventListener('DOMContentLoaded', ()=>{
+      document.querySelector('#intro').scrollIntoView();
+    });
+  </script>
+</body>
+</html>
